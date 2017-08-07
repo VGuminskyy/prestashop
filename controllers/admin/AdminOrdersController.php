@@ -1550,6 +1550,7 @@ class AdminOrdersControllerCore extends AdminController
 			'cart' => new Cart($order->id_cart),
 			'customer' => $customer,
 			'gender' => $gender,
+			'customerPhone' => $customer->phone,
 			'customer_addresses' => $customer->getAddresses($this->context->language->id),
 			'addresses' => array(
 				'delivery' => $addressDelivery,

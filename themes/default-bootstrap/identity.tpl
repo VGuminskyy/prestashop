@@ -79,10 +79,22 @@
                     <input class="is_required validate form-control" data-validate="isName" type="text" name="lastname" id="lastname" value="{$smarty.post.lastname}" />
                 </div>
                 <div class="required form-group">
+                    <label for="middlename">
+                        {l s='Middle name'} 
+                    </label>
+                    <input class="validate form-control" data-validate="isName" type="text" name="middlename" id="middlename" value="{$smarty.post.middlename}" />
+                </div>
+                <div class="required form-group">
                     <label for="email" class="required">
                         {l s='E-mail address'} 
                     </label>
                     <input class="is_required validate form-control" data-validate="isEmail" type="email" name="email" id="email" value="{$smarty.post.email}" />
+                </div>
+                <div class="required form-group">
+                    <label for="phone">
+                        {l s='Phone'} 
+                    </label>
+                    <input class="validate form-control" data-validate="isPhoneNumber" type="phone" name="phone" id="phone" value="{$smarty.post.phone}" />
                 </div>
                 <div class="form-group">
                     <label>

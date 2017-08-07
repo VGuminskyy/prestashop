@@ -50,21 +50,6 @@ class ValidateCore
 		return !empty($email) && preg_match(Tools::cleanNonUnicodeSupport('/^[a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+[._a-z\p{L}0-9-]*\.[a-z\p{L}0-9]+$/ui'), $email);
 	}
 
-	 	/**
-	 * Check for e-mail or phone validity
-	 *
-	 * @param string $email e-mail address to validate
-	 * @return boolean Validity is ok or not
-	 */
-	public static function isEmailOrPhone($data)
-	{
-		if (!empty($data) && preg_match(Tools::cleanNonUnicodeSupport('/^[a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+[._a-z\p{L}0-9-]*\.[a-z\p{L}0-9]+$/ui'), $data)) {
-			return $data;
-		} else if (!empty($data) && preg_match('/^[+0-9. ()-]*$/', $data)) {
-			return $data;
-		}
-	}
-
 	/**
 	 * Check for module URL validity
 	 *
@@ -542,7 +527,7 @@ class ValidateCore
 	 */
 	public static function isPhoneNumber($number)
 	{
-		return preg_match('/^[+0-9. ()-]*$/', $number);
+		return preg_match('/^[\d]{7}|[+\d]{13}/', $number);
 	}
 
 	/**

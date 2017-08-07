@@ -112,6 +112,8 @@ class AddressControllerCore extends FrontController
 		{
 			$_POST['firstname'] = $this->context->customer->firstname;
 			$_POST['lastname'] = $this->context->customer->lastname;
+			$_POST['middlename'] = $this->context->customer->middlename;
+			$_POST['phone'] = $this->context->customer->phone;
 			$_POST['company'] = $this->context->customer->company;
 		}
 	}

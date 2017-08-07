@@ -152,7 +152,7 @@ function validate_isMessage(s)
 
 function validate_isPhoneNumber(s)
 {
-	var reg = /^[+0-9. ()-]+$/;
+	var reg = /^[\d]{7}|[+\d]{13}/;
 	return reg.test(s);
 }
 
@@ -171,6 +171,15 @@ function validate_isEmail(s)
 function validate_isPasswd(s)
 {
 	return (s.length >= 5 && s.length < 255);
+}
+
+function validate_isEmailPhone(s)
+{
+	var phone = /^[\d]{7}|[+\d]{13}/;
+	var email = unicode_hack(/^[a-z\p{L}0-9!#$%&'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+[._a-z\p{L}0-9-]*\.[a-z\p{L}0-9]+$/i, false);
+	if (phone.test(s) == true) return phone.test(s);
+	else if (email.test(s) == true) return email.test(s);
+	else return false;
 }
 
 $(document).on('keyup blur', 'input.validate, textarea.validate', function() {

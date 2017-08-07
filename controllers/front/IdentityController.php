@@ -101,6 +101,7 @@ class IdentityControllerCore extends FrontController
 				{
 					$this->context->cookie->customer_lastname = $this->customer->lastname;
 					$this->context->cookie->customer_firstname = $this->customer->firstname;
+					$this->context->cookie->customer_middlename = $this->customer->middlename;
 					$this->context->smarty->assign('confirmation', 1);
 				}
 				else

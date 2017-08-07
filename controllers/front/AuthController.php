@@ -143,7 +143,6 @@ class AuthControllerCore extends FrontController
 				'HOOK_CREATE_ACCOUNT_FORM' => Hook::exec('displayCustomerAccountForm'),
 				'HOOK_CREATE_ACCOUNT_TOP' => Hook::exec('displayCustomerAccountFormTop')
 			));
-		
 		// Just set $this->template value here in case it's used by Ajax
 		$this->setTemplate(_PS_THEME_DIR_.'authentication.tpl');
 
@@ -264,9 +263,9 @@ class AuthControllerCore extends FrontController
 		$passwd = trim(Tools::getValue('passwd'));
 		$email = trim(Tools::getValue('email'));
 		if (empty($email))
-			$this->errors[] = Tools::displayError('An email address required.');
+			$this->errors[] = Tools::displayError('An email address or phone required.');
 		elseif (!Validate::isEmail($email))
-			$this->errors[] = Tools::displayError('Invalid email address.');
+			$this->errors[] = Tools::displayError('Invalid email address or phone.');
 		elseif (empty($passwd))
 			$this->errors[] = Tools::displayError('Password is required.');
 		elseif (!Validate::isPasswd($passwd))
@@ -282,12 +281,14 @@ class AuthControllerCore extends FrontController
 				$this->context->cookie->id_compare = isset($this->context->cookie->id_compare) ? $this->context->cookie->id_compare: CompareProduct::getIdCompareByIdCustomer($customer->id);
 				$this->context->cookie->id_customer = (int)($customer->id);
 				$this->context->cookie->customer_lastname = $customer->lastname;
+				$this->context->cookie->customer_middlename = $customer->middlename;
 				$this->context->cookie->customer_firstname = $customer->firstname;
 				$this->context->cookie->logged = 1;
 				$customer->logged = 1;
 				$this->context->cookie->is_guest = $customer->isGuest();
 				$this->context->cookie->passwd = $customer->passwd;
 				$this->context->cookie->email = $customer->email;
+				$this->context->cookie->phone = $customer->phone;
 				
 				// Add customer to the context
 				$this->context->customer = $customer;
@@ -372,15 +373,19 @@ class AuthControllerCore extends FrontController
 		if (isset($_POST['guest_email']) && $_POST['guest_email'])
 			$_POST['email'] = $_POST['guest_email'];
 		// Checked the user address in case he changed his email address
-		if (Validate::isEmail($email = Tools::getValue('email')) && !empty($email))
+		if (!empty($email = Tools::getValue('email')) || !empty($email = Tools::getValue('phone')))
+		if (Validate::isEmail($email) || Validate::isPhoneNumber($email))
 			if (Customer::customerExists($email))
 				$this->errors[] = Tools::displayError('An account using this email address has already been registered.', false);
 		// Preparing customer
 		$customer = new Customer();
 		$lastnameAddress = Tools::getValue('lastname');
-		$firstnameAddress = Tools::getValue('firstname');		
+		$firstnameAddress = Tools::getValue('firstname');
+		$middlenameAddress = Tools::getValue('middlename');	
 		$_POST['lastname'] = Tools::getValue('customer_lastname');
 		$_POST['firstname'] = Tools::getValue('customer_firstname');
+		$_POST['middlename'] = Tools::getValue('customer_middlename');
+		$_POST['phone'] = Tools::getValue('phone');
 		$addresses_types = array('address');
 		if (!Configuration::get('PS_ORDER_PROCESS_TYPE') && Configuration::get('PS_GUEST_CHECKOUT_ENABLED') && Tools::getValue('invoice_address'))
 			$addresses_types[] = 'address_invoice';
@@ -412,10 +417,11 @@ class AuthControllerCore extends FrontController
 		{
 			if (!count($this->errors))
 			{
-				if (Tools::isSubmit('newsletter'))
+				if (Tools::isSubmit('newsletter') && Tools::getValue('email'))
 					$this->processCustomerNewsletter($customer);
 
 				$customer->firstname = Tools::ucwords($customer->firstname);
+				if (!$customer->middlename) { $customer->middlename = " "; }
 				$customer->birthday = (empty($_POST['years']) ? '' : (int)$_POST['years'].'-'.(int)$_POST['months'].'-'.(int)$_POST['days']);
 				if (!Validate::isBirthDate($customer->birthday))
 					$this->errors[] = Tools::displayError('Invalid date of birth.');
@@ -424,13 +430,23 @@ class AuthControllerCore extends FrontController
 				$customer->is_guest = (Tools::isSubmit('is_new_customer') ? !Tools::getValue('is_new_customer', 1) : 0);
 				$customer->active = 1;
 
+				if (!$customer->phone) { $customer->phone = " "; }
+				if (!$customer->email) { $customer->email = "empty@empty.empty"; }
+
 				if (!count($this->errors))
 				{
 					if ($customer->add())
 					{
 						if (!$customer->is_guest)
-							if (!$this->sendConfirmationMail($customer))
+
+							if ($customer->email != "empty@empty.empty") {
+								if (!$this->sendConfirmationMail($customer))
 								$this->errors[] = Tools::displayError('The email cannot be sent.');
+							} else {
+								if (!$this->sendConfirmationSMS($customer))
+									$this->errors[] = Tools::displayError('The phone error.');
+							}
+
 
 						$this->updateContext($customer);
 
@@ -463,7 +479,7 @@ class AuthControllerCore extends FrontController
 							Tools::redirect('index.php?controller='.(($this->authRedirection !== false) ? urlencode($this->authRedirection) : 'my-account'));
 					}
 					else
-						$this->errors[] = Tools::displayError('An error occurred while creating your account.');
+						$this->errors[] = Tools::displayError('474. An error occurred while creating your account.');
 				}
 			}
 
@@ -472,6 +488,8 @@ class AuthControllerCore extends FrontController
 		{
 			$_POST['lastname'] = $lastnameAddress;
 			$_POST['firstname'] = $firstnameAddress;
+			$_POST['middlename'] = $middlenameAddress;
+			$_POST['phone'] = $phoneAddress;
 			$post_back = $_POST;
 			// Preparing addresses
 			foreach($addresses_types as $addresses_type)
@@ -537,7 +555,7 @@ class AuthControllerCore extends FrontController
 				else
 					$customer->is_guest = 0;
 				if (!$customer->add())
-					$this->errors[] = Tools::displayError('An error occurred while creating your account.');
+					$this->errors[] = Tools::displayError('550. An error occurred while creating your account.');
 				else
 				{
 					foreach($addresses_types as $addresses_type)
@@ -639,27 +657,29 @@ class AuthControllerCore extends FrontController
 			$this->context->smarty->assign('account_error', $this->errors);
 		}
 	}
-
 	/**
 	 * Process submit on a creation
 	 */
 	protected function processSubmitCreate()
 	{
-		if (!Validate::isEmail($email = Tools::getValue('email_create')) || empty($email))
-			$this->errors[] = Tools::displayError('Invalid email address.');
-		elseif (Customer::customerExists($email))
-		{
-			$this->errors[] = Tools::displayError('An account using this email address has already been registered. Please enter a valid password or request a new one. ', false);
-			$_POST['email'] = $_POST['email_create'];
-			unset($_POST['email_create']);
-		}
-		else
-		{
-			$this->create_account = true;
-			$this->context->smarty->assign('email_create', Tools::safeOutput($email));
-			$_POST['email'] = $email;
+		if (!empty(Tools::getValue('email_create'))) {
+			if (!Validate::isEmail($email = Tools::getValue('email_create')) && !Validate::isPhoneNumber($phone = Tools::getValue('email_create'))) {
+				$this->errors[] = Tools::displayError('Invalid email address or phone number.');
+			} elseif (Customer::customerExists($email)) {
+				$this->errors[] = Tools::displayError('An account using this email address has already been registered. Please enter a valid password or request a new one. ', false);
+				$_POST['email'] = $_POST['email_create'];
+				unset($_POST['email_create']);
+			} else {
+				$this->create_account = true;
+				$this->context->smarty->assign('email_create', Tools::safeOutput($email));
+				if (Validate::isEmail($email)) $_POST['email'] = $email;
+				if (Validate::isPhoneNumber($email)) $_POST['phone'] = $email;
+			}
+		} else {
+			$this->errors[] = Tools::displayError('Email address or phone number is empty.');
 		}
 	}
+
 
 	/**
 	 * Update context after customer creation
@@ -672,7 +692,9 @@ class AuthControllerCore extends FrontController
 		$this->context->cookie->id_customer = (int)$customer->id;
 		$this->context->cookie->customer_lastname = $customer->lastname;
 		$this->context->cookie->customer_firstname = $customer->firstname;
+		$this->context->cookie->customer_middlename = $customer->middlename;
 		$this->context->cookie->passwd = $customer->passwd;
+		$this->context->cookie->phone = $customer->phone;
 		$this->context->cookie->logged = 1;
 		// if register process is in two steps, we display a message to confirm account creation
 		if (!Configuration::get('PS_REGISTRATION_PROCESS_TYPE'))
@@ -701,10 +723,21 @@ class AuthControllerCore extends FrontController
 			array(
 				'{firstname}' => $customer->firstname,
 				'{lastname}' => $customer->lastname,
+				'{middlename}' => $customer->middlename,
 				'{email}' => $customer->email,
 				'{passwd}' => Tools::getValue('passwd')),
 			$customer->email,
 			$customer->firstname.' '.$customer->lastname
 		);
+	}
+
+	/**
+	 * sendConfirmationSMS
+	 * @param Customer $customer
+	 * @return bool
+	 */
+	protected function sendConfirmationSMS(Customer $customer)
+	{
+		return true;
 	}
 }

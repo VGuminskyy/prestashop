@@ -53,11 +53,17 @@ class CustomerCore extends ObjectModel
 	/** @var string Firstname */
 	public $firstname;
 
+	/** @var string Middlename */
+	public $middlename;
+
 	/** @var string Birthday (yyyy-mm-dd) */
 	public $birthday = null;
 
 	/** @var string e-mail */
 	public $email;
+
+	/** @var string phone */
+	public $phone;
 
 	/** @var boolean Newsletter subscription */
 	public $newsletter;
@@ -161,7 +167,9 @@ class CustomerCore extends ObjectModel
 			'secure_key' => 				array('type' => self::TYPE_STRING, 'validate' => 'isMd5', 'copy_post' => false),
 			'lastname' => 					array('type' => self::TYPE_STRING, 'validate' => 'isName', 'required' => true, 'size' => 32),
 			'firstname' => 					array('type' => self::TYPE_STRING, 'validate' => 'isName', 'required' => true, 'size' => 32),
-			'email' => 						array('type' => self::TYPE_STRING, 'validate' => 'isEmail', 'required' => true, 'size' => 128),
+			'middlename' => 				array('type' => self::TYPE_STRING, 'validate' => 'isName', 'size' => 32),
+			'email' => 						array('type' => self::TYPE_STRING, 'validate' => 'isEmail', 'size' => 128),
+			'phone' => 						array('type' => self::TYPE_STRING, 'validate' => 'isPhoneNumber', 'size' => 32),
 			'passwd' => 					array('type' => self::TYPE_STRING, 'validate' => 'isPasswd', 'required' => true, 'size' => 32),
 			'last_passwd_gen' =>			array('type' => self::TYPE_STRING, 'copy_post' => false),
 			'id_gender' => 					array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
@@ -296,7 +304,7 @@ class CustomerCore extends ObjectModel
 	 */
 	public static function getCustomers()
 	{
-		$sql = 'SELECT `id_customer`, `email`, `firstname`, `lastname`
+		$sql = 'SELECT `id_customer`, `email`, `phone`, `firstname`, `lastname`, `middlename`
 				FROM `'._DB_PREFIX_.'customer`
 				WHERE 1 '.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).'
 				ORDER BY `id_customer` ASC';
@@ -335,6 +343,45 @@ class CustomerCore extends ObjectModel
 		return $this;
 	}
 
+		/**
+	 * Return customer instance from its phone (optionnaly check password)
+	 *
+	 * @param string $phone phone
+	 * @param string $passwd Password is also checked if specified
+	 * @return Customer instance
+	 */
+	public function getByEmailOrPhone($data, $passwd = null, $ignore_guest = true)
+	{
+		if (!Validate::isEmail($data) || ($passwd && !Validate::isPasswd($passwd))) {
+			$email = $data;
+		} else if (!Validate::isPhoneNumber($data) || ($passwd && !Validate::isPasswd($passwd))) {
+			$phone = $data;
+		} else {
+			die (Tools::displayError());
+		}
+
+		$sql = 'SELECT *
+				FROM `'._DB_PREFIX_.'customer`
+				WHERE '.
+				($email != '' ? ' `phone` = \''.pSQL($email).' \'' : "").
+				($phone != '' ? ' `phone` = \''.pSQL($phone).' \'' : "").
+					Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).'
+					'.(isset($passwd) ? 'AND `passwd` = \''.Tools::encrypt($passwd).'\'' : '').'
+					AND `deleted` = 0'.
+					($ignore_guest ? ' AND `is_guest` = 0' : '');
+
+		$result = Db::getInstance()->getRow($sql);
+
+		if (!$result)
+			return false;
+		$this->id = $result['id_customer'];
+		foreach ($result as $key => $value)
+			if (array_key_exists($key, $this))
+				$this->{$key} = $value;
+
+		return $this;
+	}
+
 	/**
 	 * Retrieve customers by email address
 	 *
@@ -352,6 +399,22 @@ class CustomerCore extends ObjectModel
 		return Db::getInstance()->ExecuteS($sql);
 	}
 
+		/**
+	 * Retrieve customers by phone
+	 *
+	 * @static
+	 * @param $phone
+	 * @return array
+	 */
+	public static function getCustomersByPhone($phone)
+	{
+		$sql = 'SELECT *
+				FROM `'._DB_PREFIX_.'customer`
+				WHERE `phone` = \''.pSQL($phone).'\'
+					'.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER);
+
+		return Db::getInstance()->ExecuteS($sql);
+	}
 
 	/**
 	 * Check id the customer is active or not
@@ -386,7 +449,7 @@ class CustomerCore extends ObjectModel
 	 */
 	public static function customerExists($email, $return_id = false, $ignore_guest = true)
 	{
-		if (!Validate::isEmail($email))
+		if (!Validate::isEmail($email) && !Validate::isPhoneNumber($email))
 		{
 			if (defined('_PS_MODE_DEV_') && _PS_MODE_DEV_)
 				die (Tools::displayError('Invalid email'));
@@ -396,7 +459,37 @@ class CustomerCore extends ObjectModel
 		
 		$sql = 'SELECT `id_customer`
 				FROM `'._DB_PREFIX_.'customer`
-				WHERE `email` = \''.pSQL($email).'\'
+				WHERE `email` = \''.pSQL($email).'\' OR `phone` = \''.pSQL($email).'\'
+					'.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).
+					($ignore_guest ? ' AND `is_guest` = 0' : '');
+		$result = Db::getInstance()->getRow($sql);
+
+		if ($return_id)
+			return $result['id_customer'];
+		return isset($result['id_customer']);
+	}
+
+		/**
+	 * Check if phone is already registered in database
+	 *
+	 * @param string $phone phone
+	 * @param $return_id boolean
+	 * @param $ignore_guest boolean, to exclude guest customer
+	 * @return Customer ID if found, false otherwise
+	 */
+	public static function customerExistsPhone($phone, $return_id = false, $ignore_guest = true)
+	{
+		if (!Validate::isPhoneNumber($phone))
+		{
+			if (defined('_PS_MODE_DEV_') && _PS_MODE_DEV_)
+				die (Tools::displayError('Invalid phone'));
+			else
+				return false;
+		}
+		
+		$sql = 'SELECT `id_customer`
+				FROM `'._DB_PREFIX_.'customer`
+				WHERE `phone` = \''.pSQL($phone).'\'
 					'.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).
 					($ignore_guest ? ' AND `is_guest` = 0' : '');
 		$result = Db::getInstance()->getRow($sql);
@@ -511,9 +604,11 @@ class CustomerCore extends ObjectModel
 				FROM `'._DB_PREFIX_.'customer`
 				WHERE (
 						`email` LIKE \'%'.pSQL($query).'%\'
+						OR `phone` LIKE \'%'.pSQL($query).'%\'
 						OR `id_customer` LIKE \'%'.pSQL($query).'%\'
 						OR `lastname` LIKE \'%'.pSQL($query).'%\'
 						OR `firstname` LIKE \'%'.pSQL($query).'%\'
+						OR `middlename` LIKE \'%'.pSQL($query).'%\'
 					)'.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER);
 		return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
 	}
@@ -740,7 +835,9 @@ class CustomerCore extends ObjectModel
 			$vars = array(
 				'{firstname}' => $this->firstname,
 				'{lastname}' => $this->lastname,
+				'{middlename}' => $this->middlename,
 				'{email}' => $this->email,
+				'{phone}' => $this->phone,
 				'{passwd}' => $password
 			);
 

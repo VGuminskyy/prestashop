@@ -57,8 +57,8 @@
 					<p>{l s='Please enter your email address to create an account.'}</p>
 					<div class="alert alert-danger" id="create_account_error" style="display:none"></div>
 					<div class="form-group">
-						<label for="email_create">{l s='Email address'}</label>
-						<input type="text" class="is_required validate account_input form-control" data-validate="isEmail" id="email_create" name="email_create" value="{if isset($smarty.post.email_create)}{$smarty.post.email_create|stripslashes}{/if}" />
+						<label for="email_create">{l s='Email address or Phone'}</label>
+						<input type="text" class="is_required validate account_input form-control" data-validate="isEmailPhone" id="email_create" name="email_create" value="{if isset($smarty.post.email_create)}{$smarty.post.email_create|stripslashes}{/if}" />
 					</div>
 					<div class="submit">
 						{if isset($back)}<input type="hidden" class="hidden" name="back" value="{$back|escape:'html':'UTF-8'}" />{/if}
@@ -129,6 +129,14 @@
 						<label for="lastname">{l s='Last name'} <sup>*</sup></label>
 						<input type="text" class="is_required validate form-control" data-validate="isName" id="lastname" name="lastname" onblur="$('#customer_lastname').val($(this).val());" value="{if isset($smarty.post.lastname)}{$smarty.post.lastname}{/if}" />
 						<input type="hidden" id="customer_lastname" name="customer_lastname" value="{if isset($smarty.post.lastname)}{$smarty.post.lastname}{/if}" />
+					</div>
+					<div class="required form-group">
+						<label for="middlename">{l s='Middle name'} <sup>*</sup></label>
+						<input type="text" class="validate form-control" data-validate="isName" id="middlename" name="middlename" value="{if isset($smarty.post.middlename)}{$smarty.post.middlename}{/if}" />
+					</div>
+					<div class="required form-group">
+						<label for="phone">{l s='Phone'}</label>
+						<input type="text" class="validate form-control" data-validate="isPphone" id="phone" name="phone" value="{if isset($smarty.post.phone)}{$smarty.post.phone}{/if}" />
 					</div>
 					<div class="form-group date-select">
 						<label>{l s='Date of Birth'}</label>
@@ -313,6 +321,11 @@
 							<label for="lastname_invoice">{l s='Last name'} <sup>*</sup></label>
 							<input type="text" class="form-control" id="lastname_invoice" name="lastname_invoice" value="{if isset($guestInformations) && $guestInformations.lastname_invoice}{$guestInformations.lastname_invoice}{/if}" />
 						</div>
+						{elseif $field_name eq "middlename"}
+						<div class="required form-group">
+							<label for="middlename_invoice">{l s='Middle name'}</label>
+							<input type="text" class="form-control" id="middlename_invoice" name="middlename_invoice" value="{if isset($guestInformations) && $guestInformations.middlename_invoice}{$guestInformations.middlename_invoice}{/if}" />
+						</div>
 						{elseif $field_name eq "address1"}
 						<div class="required form-group">
 							<label for="address1_invoice">{l s='Address'} <sup>*</sup></label>
@@ -441,8 +454,16 @@
 				<input onkeyup="$('#lastname').val(this.value);" type="text" class="is_required validate form-control" data-validate="isName" id="customer_lastname" name="customer_lastname" value="{if isset($smarty.post.customer_lastname)}{$smarty.post.customer_lastname}{/if}" />
 			</div>
 			<div class="required form-group">
-				<label for="email">{l s='Email'} <sup>*</sup></label>
-				<input type="text" class="is_required validate form-control" data-validate="isEmail" id="email" name="email" value="{if isset($smarty.post.email)}{$smarty.post.email}{/if}" />
+				<label for="customer_middlename">{l s='Middle name'}</label>
+				<input onkeyup="$('#middlename').val(this.value);" type="text" class="validate form-control" data-validate="isName" id="customer_middlename" name="customer_middlename" value="{if isset($smarty.post.customer_middlename)}{$smarty.post.customer_middlename}{/if}" />
+			</div>
+			<div class="required form-group">
+				<label for="phone">{l s='Phone'}</label>
+				<input type="text" class="validate form-control" data-validate="isPhoneNumber" id="phone" name="phone" value="{if isset($smarty.post.phone)}{$smarty.post.phone}{/if}" />
+			</div>
+			<div class="required form-group">
+				<label for="email">{l s='Email'}</label>
+				<input type="text" class="validate form-control" data-validate="isEmail" id="email" name="email" value="{if isset($smarty.post.email)}{$smarty.post.email}{/if}" />
 			</div>
 			<div class="required password form-group">
 				<label for="passwd">{l s='Password'} <sup>*</sup></label>
@@ -551,6 +572,11 @@
 						<p class="required form-group">
 							<label for="lastname">{l s='Last name'} <sup>*</sup></label>
 							<input type="text" class="form-control" id="lastname" name="lastname" value="{if isset($smarty.post.lastname)}{$smarty.post.lastname}{/if}" />
+						</p>
+						{elseif $field_name eq "middlename"}
+						<p class="required form-group">
+							<label for="middlename">{l s='Middle name'}</label>
+							<input type="text" class="form-control" id="middlename" name="middlename" value="{if isset($smarty.post.middlename)}{$smarty.post.middlename}{/if}" />
 						</p>
 					{elseif $field_name eq "address1"}
 						<p class="required form-group">

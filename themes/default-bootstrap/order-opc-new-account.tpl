@@ -85,6 +85,10 @@
 					<label for="lastname">{l s='Last name'} <sup>*</sup></label>
 					<input type="text" class="form-control validate" id="customer_lastname" name="customer_lastname" onblur="$('#lastname').val($(this).val());" data-validate="isName" value="{if isset($guestInformations) && isset($guestInformations.customer_lastname) && $guestInformations.customer_lastname}{$guestInformations.customer_lastname}{/if}" />
 				</div>
+				<div class="required form-group">
+					<label for="middlename">{l s='Middle name'} <sup>*</sup></label>
+					<input type="text" class="form-control validate" id="customer_middlename" name="customer_middlename" onblur="$('#middlename').val($(this).val());" data-validate="isName" value="{if isset($guestInformations) && isset($guestInformations.customer_middlename) && $guestInformations.customer_middlename}{$guestInformations.customer_middlename}{/if}" />
+				</div>
 				<div class="select form-group date-select">
 					<label>{l s='Date of Birth'}</label>
                     <div class="row">
@@ -173,6 +177,11 @@
 				<div class="required text form-group">
 					<label for="lastname">{l s='Last name'} <sup>*</sup></label>
 					<input type="text" class="text form-control validate" id="lastname" name="lastname" data-validate="isName" value="{if isset($guestInformations) && isset($guestInformations.lastname) && $guestInformations.lastname}{$guestInformations.lastname}{/if}" />
+				</div>
+				{elseif $field_name eq "middlename"}
+				<div class="required text form-group">
+					<label for="middlename">{l s='Middle name'} <sup>*</sup></label>
+					<input type="text" class="text form-control validate" id="middlename" name="middlename" data-validate="isName" value="{if isset($guestInformations) && isset($guestInformations.middlename) && $guestInformations.middlename}{$guestInformations.middlename}{/if}" />
 				</div>
 				{elseif $field_name eq "address1"}
 				<div class="required text form-group">
@@ -292,6 +301,11 @@
 					<div class="required form-group">
 						<label for="lastname_invoice">{l s='Last name'} <sup>*</sup></label>
 						<input type="text" class="form-control validate" id="lastname_invoice" name="lastname_invoice" data-validate="isName" value="{if isset($guestInformations) && isset($guestInformations.lastname_invoice) && $guestInformations.lastname_invoice}{$guestInformations.lastname_invoice}{/if}" />
+					</div>
+					{elseif $field_name eq "middlename"}
+					<div class="required form-group">
+						<label for="middlename_invoice">{l s='Last name'} <sup>*</sup></label>
+						<input type="text" class="form-control validate" id="middlename_invoice" name="middlename_invoice" data-validate="isName" value="{if isset($guestInformations) && isset($guestInformations.middlename_invoice) && $guestInformations.middlename_invoice}{$guestInformations.middlename_invoice}{/if}" />
 					</div>
 					{elseif $field_name eq "address1"}
 					<div class="required form-group">

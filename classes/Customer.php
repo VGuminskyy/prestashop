@@ -320,12 +320,13 @@ class CustomerCore extends ObjectModel
 	 */
 	public function getByEmail($email, $passwd = null, $ignore_guest = true)
 	{
-		if (!Validate::isEmail($email) || ($passwd && !Validate::isPasswd($passwd)))
+		if ($passwd && !Validate::isPasswd($passwd))
+			if (!Validate::isEmail($email) || !Validate::isPhoneNumber($email))
 			die (Tools::displayError());
 
 		$sql = 'SELECT *
 				FROM `'._DB_PREFIX_.'customer`
-				WHERE `email` = \''.pSQL($email).'\'
+				WHERE `email` = \''.pSQL($email).'\' OR `phone` = \''.pSQL($email).'\'
 					'.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).'
 					'.(isset($passwd) ? 'AND `passwd` = \''.Tools::encrypt($passwd).'\'' : '').'
 					AND `deleted` = 0'.

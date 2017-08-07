@@ -262,9 +262,10 @@ class AuthControllerCore extends FrontController
 		Hook::exec('actionBeforeAuthentication');
 		$passwd = trim(Tools::getValue('passwd'));
 		$email = trim(Tools::getValue('email'));
+
 		if (empty($email))
 			$this->errors[] = Tools::displayError('An email address or phone required.');
-		elseif (!Validate::isEmail($email))
+		elseif (!Validate::isEmail($email) && !Validate::isPhoneNumber($email))
 			$this->errors[] = Tools::displayError('Invalid email address or phone.');
 		elseif (empty($passwd))
 			$this->errors[] = Tools::displayError('Password is required.');

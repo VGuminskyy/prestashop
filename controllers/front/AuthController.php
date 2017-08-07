@@ -421,7 +421,6 @@ class AuthControllerCore extends FrontController
 					$this->processCustomerNewsletter($customer);
 
 				$customer->firstname = Tools::ucwords($customer->firstname);
-				if (!$customer->middlename) { $customer->middlename = " "; }
 				$customer->birthday = (empty($_POST['years']) ? '' : (int)$_POST['years'].'-'.(int)$_POST['months'].'-'.(int)$_POST['days']);
 				if (!Validate::isBirthDate($customer->birthday))
 					$this->errors[] = Tools::displayError('Invalid date of birth.');
@@ -430,8 +429,8 @@ class AuthControllerCore extends FrontController
 				$customer->is_guest = (Tools::isSubmit('is_new_customer') ? !Tools::getValue('is_new_customer', 1) : 0);
 				$customer->active = 1;
 
-				if (!$customer->phone) { $customer->phone = " "; }
-				if (!$customer->email) { $customer->email = "empty@empty.empty"; }
+				if (!$customer->phone && !$customer->email)
+					$this->errors[] = Tools::displayError('Phone and Email empty.');
 
 				if (!count($this->errors))
 				{
@@ -439,7 +438,7 @@ class AuthControllerCore extends FrontController
 					{
 						if (!$customer->is_guest)
 
-							if ($customer->email != "empty@empty.empty") {
+							if ($customer->email) {
 								if (!$this->sendConfirmationMail($customer))
 								$this->errors[] = Tools::displayError('The email cannot be sent.');
 							} else {

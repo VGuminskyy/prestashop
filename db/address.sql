@@ -59,14 +59,7 @@ CREATE TABLE `address` (
 --
 
 INSERT INTO `address` (`id_address`, `id_country`, `id_state`, `id_customer`, `id_manufacturer`, `id_supplier`, `id_warehouse`, `alias`, `company`, `lastname`, `firstname`, `middlename`, `address1`, `address2`, `postcode`, `city`, `other`, `phone`, `phone_mobile`, `vat_number`, `dni`, `date_add`, `date_upd`, `active`, `deleted`) VALUES
-(1, 8, 0, 1, 0, 0, 0, 'Mon adresse', 'My Company', 'DOE', 'John', '', '16, Main street', '2nd floor', '75002', 'Paris ', '', '0102030405', '', '', '', '2017-08-05 12:28:28', '2017-08-05 12:28:28', 1, 0),
-(2, 21, 32, 0, 0, 0, 0, 'supplier', 'Fashion', 'supplier', 'supplier', '', '767 Fifth Ave.', '', '10153', 'New York', '', '(212) 336-1440', '', '', '', '2017-08-05 12:28:28', '2017-08-05 12:28:28', 1, 0),
-(3, 21, 9, 1, 0, 0, 0, 'My address', 'My Company', 'DOE', 'John', '', '16, Main street', '2nd floor', '33133', 'Miami', '', '0102030405', '', '', '', '2017-08-05 12:28:28', '2017-08-05 12:28:28', 1, 0),
-(4, 216, 321, 2, 0, 0, 0, 'My address', '', 'Guminskyy', 'Vyacheslav', 'Borisovich', 'Severnaya 54', '', '04700', 'Kiev', '', '', '380962189449', '', '', '2017-08-05 13:49:47', '2017-08-05 13:49:47', 1, 0),
-(5, 216, 321, 12, 0, 0, 0, 'My address', '', 'Stradlin', 'Izzy', ' ', 'Guns N’ Roses', '', '12345', 'New York', '', ' +123456789', '', '', '', '2017-08-06 23:48:59', '2017-08-06 23:48:59', 1, 0),
-(6, 216, 321, 14, 0, 0, 0, 'My address', '', 'Gray', 'David', ' ', 'Great Britain', '', '12345', 'Sale', '', '+380441234567', '', '', '', '2017-08-06 23:55:59', '2017-08-06 23:55:59', 1, 0),
-(7, 216, 321, 15, 0, 0, 0, 'My address', '', 'Greenwood', 'Jonathan', 'Richard Guy ', 'England', '', '12345', 'Oxford', '', '044123 22 33', '', '', '', '2017-08-07 00:01:24', '2017-08-07 00:01:24', 1, 0),
-(8, 216, 320, 16, 0, 0, 0, 'My address', '', 'Zappa', 'Frank', 'Vincent', 'USA', '', '12345', 'Baltimor', '', '+380502480990', '', '', '', '2017-08-07 00:07:33', '2017-08-07 00:07:33', 1, 0);
+(1, 8, 0, 1, 0, 0, 0, 'Mon adresse', 'My Company', 'DOE', 'John', '', '16, Main street', '2nd floor', '75002', 'Paris ', '', '0102030405', '', '', '', '2017-08-05 12:28:28', '2017-08-05 12:28:28', 1, 0);
 
 --
 -- Индексы сохранённых таблиц

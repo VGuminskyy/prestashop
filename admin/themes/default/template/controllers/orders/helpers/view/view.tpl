@@ -571,10 +571,10 @@
 								{/if}
 							{else}
 								<dl class="well list-detail">
-									{if ($customer->email != 'empty@empty.empty')}
+									{if ($customer->email)}
 										<dt>{l s='Email'}</dt><dd><a href="mailto:{$customer->email}"><i class="icon-envelope-o"></i> {$customer->email}</a></dd>
 									{/if}
-									{if ($customerPhone != ' ')}
+									{if ($customerPhone)}
 									<dt>{l s='Phone'}</dt><dd>{$customerPhone}</dd>
 									{/if}
 									<dt>{l s='Account registered'}</dt>
